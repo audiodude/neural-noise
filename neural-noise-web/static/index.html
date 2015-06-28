@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="/js/inc/shim/Base64.js" type="text/javascript"></script>
+	<script src="/js/inc/shim/Base64binary.js" type="text/javascript"></script>
+	<script src="/js/inc/shim/WebAudioAPI.js" type="text/javascript"></script>
+	<script src="/js/inc/shim/WebMIDIAPI.js" type="text/javascript"></script>
+	<script src="/js/inc/jasmid/stream.js"></script>
+	<script src="/js/inc/jasmid/midifile.js"></script>
+	<script src="/js/inc/jasmid/replayer.js"></script>
+	<script src="/js/midi/audioDetect.js" type="text/javascript"></script>
+	<script src="/js/midi/gm.js" type="text/javascript"></script>
+	<script src="/js/midi/loader.js" type="text/javascript"></script>
+	<script src="/js/midi/plugin.audiotag.js" type="text/javascript"></script>
+	<script src="/js/midi/plugin.webaudio.js" type="text/javascript"></script>
+	<script src="/js/midi/plugin.webmidi.js" type="text/javascript"></script>
+	<script src="/js/midi/player.js" type="text/javascript"></script>
+	<script src="/js/util/dom_request_xhr.js" type="text/javascript"></script>
+	<script src="/js/util/dom_request_script.js" type="text/javascript"></script>
+	<script src="/js/inc/timer.js" type="text/javascript"></script>
+	<script src="/js/inc/colorspace.js" type="text/javascript"></script>
+	<script src="/js/inc/event.js" type="text/javascript"></script>
+
+  <script>
+    var player;
+    window.onload = function() {
+      MIDI.loadPlugin({
+        onsuccess: function() {
+          /// this sets up the MIDI.Player and gets things going...
+          player = MIDI.Player;
+          player.timeWarp = 1; // speed the song is played back
+          player.loadFile(song);
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+  <p>Welcome to the song explorer.</p>
+  <button onclick="player.start">Play</button>
+</body>
+</html>
