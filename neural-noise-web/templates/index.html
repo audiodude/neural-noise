@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <h1>Neural Noise</h1>
+  <b>Temperature:</b><br>
+  <form action="/query">
+    <select name="temperature">
+      {% for i in range(5, 105, 5) %}
+        <option value="{{i/100.0}}" {%if i == 80%}selected{%endif%}>
+          {{i/100.0}}
+        </option>
+      {% endfor %}
+    </select>
+    <br>
+    <br>
+    <input type="submit" value="Generate music"/>
+  </form>
+</body>
+</html>
