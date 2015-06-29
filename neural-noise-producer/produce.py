@@ -1,5 +1,6 @@
 import base64
 import os
+import random
 import re
 import subprocess
 import tempfile
@@ -8,7 +9,7 @@ import time
 import pymongo
 
 CHAR_RNN_DIR = '/home/music/char-rnn'
-CP_FILE = 'lm_lstm_epoch18.85_0.3871.t7'
+CP_FILE = 'lm_lstm_epoch21.83_0.3838.t7'
 DATA_LENGTH = 8192
 
 MONGO_URL = 'mongodb://localhost:27017/neural-noise'
@@ -53,33 +54,58 @@ def get_songs(temperature):
     song = 'X:1\n' + song
     yield song
 
-def get_midi_path(song):
+def get_midi_and_png(song):
   with tempfile.NamedTemporaryFile() as f:
     f.write(song)
     f.flush()
-    dest_path = os.path.join('/tmp', os.path.basename(f.name) + '.mid')
-    args = ['/home/music/abcmidi/abc2midi', f.name, '-o', dest_path, '-silent']
-    print ' '.join(args)
-    subprocess.call(args)
-    return dest_path
+
+    with tempfile.NamedTemporaryFile() as m:
+      args = ['/home/music/abcmidi/abc2midi', f.name, '-o', m.name,'-silent']
+      subprocess.call(args)
+      m.seek(0)
+      yield m.read()
+
+    # The conversion from abc to .tex is not currently working.
+    # with tempfile.NamedTemporaryFile() as s:
+    #   args = ['/home/music/abc2mtex1.6.1/abc2mtex', '-x', '-o', s.name, f.name]
+    #   subprocess.call(args)
+    #   with tempfile.NamedTemporaryFile() as p:
+    #     args = ['gs', '-sDEVICE=pngalpha', '-o', p.name, '-r160', s.name]
+    #     subprocess.call(args)
+    #     p.seek(0)
+    #     yield p.read()
 
 def insert_songs(temperature):
   count = 0
   for song in get_songs(temperature):
     count += 1
-    midi_path = get_midi_path(song)
+    if count == 1:
+      print song
+    data = get_midi_and_png(song)
 
-    with open(midi_path) as f:
-      midi_bin = f.read()
-    midi = base64.b64encode(midi_bin)
+    midi = base64.b64encode(next(data))
+    # png = base64.b64encode(next(data))
 
     db.songs.insert({
+      'random': random.random(),
+      'temperature': temperature,
       'abc': song,
       'midi': midi,
+      # 'png': png,
     })
   return count
 
+def fill_all_temps():
+  for i in range(5, 105, 5):
+    num = 0
+    while num < 100:
+      temperature = str(i/100.0)
+      num = insert_songs(temperature)
+      print '%s songs inserted, temperature=%s' % (num, temperature)
+
 if __name__ == '__main__':
-  temperature = '0.85'
+  temperature = '0.9'
   num = insert_songs(temperature)
   print '%s songs inserted, temperature=%s' % (num, temperature)
+
+
