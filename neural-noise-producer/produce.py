@@ -9,6 +9,10 @@ import time
 import pymongo
 
 CHAR_RNN_DIR = '/home/music/char-rnn'
+ABCM2PS_PATH = '/home/music/abcm2ps-7.8.14/abcm2ps'
+ABC2MIDI_PATH = '/home/music/abcmidi/abc2midi'
+PNG_OUTPUT_PATH = '/var/nn/png'
+
 CP_FILE = 'lm_lstm_epoch21.83_0.3838.t7'
 DATA_LENGTH = 8192
 
@@ -54,45 +58,37 @@ def get_songs(temperature):
     song = 'X:1\n' + song
     yield song
 
-def get_midi_and_png(song):
-  with tempfile.NamedTemporaryFile() as f:
-    f.write(song)
-    f.flush()
-
-    with tempfile.NamedTemporaryFile() as m:
-      args = ['/home/music/abcmidi/abc2midi', f.name, '-o', m.name,'-silent']
-      subprocess.call(args)
-      m.seek(0)
-      yield m.read()
-
-    # The conversion from abc to .tex is not currently working.
-    # with tempfile.NamedTemporaryFile() as s:
-    #   args = ['/home/music/abc2mtex1.6.1/abc2mtex', '-x', '-o', s.name, f.name]
-    #   subprocess.call(args)
-    #   with tempfile.NamedTemporaryFile() as p:
-    #     args = ['gs', '-sDEVICE=pngalpha', '-o', p.name, '-r160', s.name]
-    #     subprocess.call(args)
-    #     p.seek(0)
-    #     yield p.read()
-
 def insert_songs(temperature):
   count = 0
   for song in get_songs(temperature):
     count += 1
-    if count == 1:
-      print song
-    data = get_midi_and_png(song)
 
-    midi = base64.b64encode(next(data))
-    # png = base64.b64encode(next(data))
+    with tempfile.NamedTemporaryFile() as f:
+      f.write(song)
+      f.flush()
 
-    db.songs.insert({
-      'random': random.random(),
-      'temperature': temperature,
-      'abc': song,
-      'midi': midi,
-      # 'png': png,
-    })
+      with tempfile.NamedTemporaryFile() as m:
+        args = [ABC2MIDI_PATH, f.name, '-o', m.name,'-silent']
+        subprocess.call(args)
+        m.seek(0)
+        midi = m.read()
+
+      data = {
+        'random': random.random(),
+        'temperature': temperature,
+        'abc': song,
+        'midi': base64.b64encode(midi),
+      }
+      db.songs.insert(data)
+      png_path = os.path.join(PNG_OUTPUT_PATH, str(data['_id']) + '.png')
+
+      # Convert from abc to SVG, then to PNG
+      with tempfile.NamedTemporaryFile() as s:
+        args = [ABCM2PS_PATH, '-O', s.name, f.name]
+        subprocess.call(args)
+        args = ['convert', '-density', '100', '-trim', s.name, png_path]
+        subprocess.call(args)
+
   return count
 
 def fill_all_temps():
