@@ -58,7 +58,8 @@
 </head>
 <body>
   <p>Welcome to the song explorer.</p>
-  <textarea rows="30" cols="90">{{ song['abc'] }}</textarea><br><br>
-  <button id="playpause" onclick="playpause()" disabled="disabled">Play</button>
+  <p><textarea rows="30" cols="90">{{ song['abc'] }}</textarea></p>
+  <p><button id="playpause" onclick="playpause()" disabled="disabled">Play</button></p>
+  <p><img src="/png/{{ song['_id'] }}.png"/></p>
 </body>
 </html>

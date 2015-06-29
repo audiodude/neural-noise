@@ -8,7 +8,7 @@
   <form action="/query">
     <select name="temperature">
       {% for i in range(5, 105, 5) %}
-        <option value="{{i/100.0}}" {%if i == 80%}selected{%endif%}>
+        <option value="{{i/100.0}}" {%if i == 90%}selected{%endif%}>
           {{i/100.0}}
         </option>
       {% endfor %}

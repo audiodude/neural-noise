@@ -46,11 +46,10 @@ def query():
   song = random_song(temperature)
   if not song:
     return 'Error: no songs with temperature=%s found' % temperature
-  return flask.redirect(flask.url_for('render', x=str(song['_id'])))
+  return flask.redirect(flask.url_for('render', id_=str(song['_id'])))
 
-@app.route('/render')
-def render():
-  id_ = flask.request.args['x']
+@app.route('/render/<id_>')
+def render(id_):
   song = db.songs.find_one({
     '_id': { '$eq': bson.objectid.ObjectId(id_) }
   })
