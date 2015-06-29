@@ -91,17 +91,23 @@ def insert_songs(temperature):
 
   return count
 
-def fill_all_temps():
-  for i in range(5, 105, 5):
-    num = 0
-    while num < 100:
-      temperature = str(i/100.0)
-      num = insert_songs(temperature)
-      print '%s songs inserted, temperature=%s' % (num, temperature)
+def fill_minimum(temperature, min_):
+  num = 0
+  while num < min_:
+    num += insert_songs(temperature)
+  return num
+
+def fill_all_temps(min_):
+  for i in range(50, 105, 5):
+    temperature = str(i/100.0)
+    num = fill_minimum(temperature, min_)
+    print '%s songs inserted, temperature=%s' % (num, temperature)    
 
 if __name__ == '__main__':
-  temperature = '0.9'
-  num = insert_songs(temperature)
-  print '%s songs inserted, temperature=%s' % (num, temperature)
+  import sys
+  min_ = 100
+  if len(sys.argv) > 1:
+    min_ = int(sys.argv[1])
 
+  fill_all_temps(min_)
 
