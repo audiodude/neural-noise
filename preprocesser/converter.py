@@ -8,10 +8,16 @@ from lxml import etree
 METADATA_ORDER = ['X', 'T', 'C', 'M', 'Q', 'V', 'K']
 NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 
-class ConversionException(object):
+class ConversionException(Exception):
   pass
 
-class UnrecognizedMeterException(object):
+class MissingNotesException(ConversionException):
+  pass
+
+class MissingChordsException(ConversionException):
+  pass
+
+class UnrecognizedMeterException(ConversionException):
   pass
 
 def write_metadata(out, metadata):
@@ -25,15 +31,16 @@ def write_metadata(out, metadata):
       for v in value:
         out.write('%s:%s\n' % (key, v))
 
-def get_metadata(root):
+def get_metadata(root, skip_artist_title=True):
   metadata = {}
-  artist = root.xpath('//artist/text()')
-  if artist:
-    metadata['C'] = artist[0]
+  if not skip_artist_title:
+    artist = root.xpath('//artist/text()')
+    if artist:
+      metadata['C'] = artist[0]
 
-  title = root.xpath('//title/text()')
-  if title:
-    metadata['T'] = title[0]
+    title = root.xpath('//title/text()')
+    if title:
+      metadata['T'] = title[0]
 
   meter = root.xpath('//beats_in_measure/text()')
   if meter:
@@ -106,6 +113,9 @@ def get_notes(root):
   return notes
 
 def write_notes(out, notes, use_repeat=False):
+  if not notes:
+    raise MissingNotesException()
+
   out.write('[V:notes] ')
   if use_repeat:
     out.write('|:')
@@ -130,6 +140,9 @@ def get_chords(root):
   return chords
 
 def write_chords(out, chords, use_repeat=False):
+  if not chords:
+    raise MissingChordsException()
+
   out.write('[V:chords]')
   if use_repeat:
     out.write(' |:')
@@ -174,6 +187,11 @@ if __name__ == '__main__':
           full_path = os.path.join(dirpath, filename)
           try:
             data = abc_from_xml(full_path, use_repeat=True)
+          except (MissingNotesException, MissingChordsException,
+                  UnrecognizedMeterException):
+            # Filter out songs that are missing notes, chords, have
+            # unrecognized meter,
+            pass
           except:
             sys.stderr.write(filename + '\n')
             raise
