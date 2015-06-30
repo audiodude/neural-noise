@@ -7,6 +7,8 @@ from lxml import etree
 
 METADATA_ORDER = ['X', 'T', 'C', 'M', 'Q', 'V', 'K']
 NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+MIN_NOTES = 8
+MIN_CHORDS = 4
 
 class ConversionException(Exception):
   pass
@@ -14,10 +16,16 @@ class ConversionException(Exception):
 class MissingNotesException(ConversionException):
   pass
 
+class EmptyNoteException(ConversionException):
+  pass
+
 class MissingChordsException(ConversionException):
   pass
 
 class UnrecognizedMeterException(ConversionException):
+  pass
+
+class UnrecognizedChordException(ConversionException):
   pass
 
 def write_metadata(out, metadata):
@@ -97,10 +105,22 @@ def get_notes(root):
   note_xmls = root.xpath('//note')
   for note_xml in note_xmls:
     degree = note_xml.find('scale_degree').text
+    if not degree:
+      raise EmptyNoteException(degree)
     if degree == 'rest':
       note = 'x'
     else:
-      note = NOTES[int(degree) - 1]
+      accidental = ''
+      if degree.endswith('f'):
+        accidental = '_'
+        degree = int(degree[:-1])
+      elif degree.endswith('s'):
+        accidental = '^'
+        degree = int(degree[:-1])
+      else:
+        degree = int(degree)
+
+      note = accidental + NOTES[degree - 1]
 
     octave = note_xml.find('octave').text
     octave_append = get_octave_appendix(octave)
@@ -113,7 +133,7 @@ def get_notes(root):
   return notes
 
 def write_notes(out, notes, use_repeat=False):
-  if not notes:
+  if not notes or len(notes) < MIN_NOTES:
     raise MissingNotesException()
 
   out.write('[V:notes] ')
@@ -128,10 +148,19 @@ def get_chords(root):
   chords = []
   chord_xmls = root.xpath('//chord')
   for chord_xml in chord_xmls:
-    degree = int(chord_xml.find('sd').text)
-    notes = (NOTES[degree - 1] + ',',
-             NOTES[(degree + 2) % 7 - 1] + ',',
-             NOTES[(degree + 4) % 7 - 1] + ',')
+    degree = chord_xml.find('sd').text
+    if degree == 'rest':
+      notes = ('x',)
+    else:
+      try:
+        degree = int(degree)
+      except ValueError:
+        # The chord is 'flat' or 'sharp'. Not sure how to interpret this
+        # musically, so just fail the whole song.
+        raise UnrecognizedChordException(degree)
+      notes = (NOTES[degree - 1] + ',',
+               NOTES[(degree + 2) % 7 - 1] + ',',
+               NOTES[(degree + 4) % 7 - 1] + ',')
 
     duration = chord_xml.find('chord_duration').text
     length_append = get_length_appendix(duration)
@@ -140,7 +169,7 @@ def get_chords(root):
   return chords
 
 def write_chords(out, chords, use_repeat=False):
-  if not chords:
+  if not chords or len(chords) < MIN_CHORDS:
     raise MissingChordsException()
 
   out.write('[V:chords]')
@@ -183,16 +212,18 @@ if __name__ == '__main__':
     util.mkdir_p('xml/abc')
     for dirpath, dirnames, filenames in os.walk(file_or_dir):
       for filename in filenames:
+        full_path = os.path.join(dirpath, filename)
+        try:
+          data = abc_from_xml(full_path, use_repeat=True)
+        except ConversionException:
+          # Filter out songs that are missing notes, chords, have
+          # unrecognized meter, etc. We might some day accommodate these.
+          continue
+        except:
+          # If there is an unexpected exception, write the file name before
+          # we crash so that it can potentially be debugged.
+          sys.stderr.write(filename + '\n')
+          raise
+
         with open(os.path.join('xml/abc/', filename) + '.abc', 'w') as f:
-          full_path = os.path.join(dirpath, filename)
-          try:
-            data = abc_from_xml(full_path, use_repeat=True)
-          except (MissingNotesException, MissingChordsException,
-                  UnrecognizedMeterException):
-            # Filter out songs that are missing notes, chords, have
-            # unrecognized meter,
-            pass
-          except:
-            sys.stderr.write(filename + '\n')
-            raise
           f.write(data + '\n')
