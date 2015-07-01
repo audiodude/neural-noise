@@ -48,7 +48,6 @@ def index():
 def query():
   temperature = flask.request.args['temperature']
   checkpoint = flask.request.args['checkpoint']
-  print 'Checkpoint %s temperature %s' % (checkpoint, temperature)
   song = random_song(checkpoint, temperature)
   if not song:
     return 'Error: no songs at checkpoint=%swith temperature=%s found' % (checkpoint, temperature)
@@ -66,9 +65,11 @@ def render(checkpoint, id_):
 @app.route('/2png/<id_>.png')
 def png(id_):
   parts = urlparse.urlparse(flask.request.url)
+  new_host = flask.request.headers['Host']
+  new_host = new_host if new_host else parts.hostname
   new_path = parts.path.replace('2png', 'png')
   # Replace the /2png/ with just /png/ and remove the port
-  new_parts = [parts.scheme, parts.hostname, new_path, '', '']
+  new_parts = [parts.scheme, new_host, new_path, '', '']
   new_url = urlparse.urlunsplit(new_parts)
   return flask.redirect(new_url)
 
