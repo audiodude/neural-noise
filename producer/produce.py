@@ -1,5 +1,4 @@
 import base64
-import datetime
 import os
 import random
 import re
@@ -31,7 +30,7 @@ def get_generated_data(temperature):
                'file': CP_FILE,
                'length': DATA_LENGTH,
                'temp': temperature,
-               'seed': int(time.time())
+               'seed': int(float(time.time()) * 1000)
              })
   pipe = subprocess.Popen(
     cmdline, executable='/bin/bash', shell=True, cwd=CHAR_RNN_DIR,
@@ -77,6 +76,7 @@ def insert_song(song, col='songs', fields=None):
 
     fields.update({
       'random': random.random(),
+      'created_at': int(time.time())
       'checkpoint': CP_FILE,
       'abc': song,
       'midi': base64.b64encode(midi),
