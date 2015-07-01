@@ -13,7 +13,6 @@ ABCM2PS_PATH = '/home/music/abcm2ps-7.8.14/abcm2ps'
 ABC2MIDI_PATH = '/home/music/abcmidi/abc2midi'
 PNG_OUTPUT_PATH = '/var/nn/png'
 
-CP_FILE = 'lm_lstm_epoch1.98_0.5266.t7'
 DATA_LENGTH = 8192
 
 MONGO_URL = 'mongodb://localhost:27017/neural-noise'
@@ -24,10 +23,10 @@ RE_REPEAT = re.compile('\|:(.*?):\|')
 RE_TITLE = re.compile('T:(.*)')
 RE_COMPOSER = re.compile('C:(.*)')
 
-def get_generated_data(temperature):
+def get_generated_data(temperature, cp_path):
   cmdline = ('th sample.lua cv/%(file)s -primetext "X:1" -length %(length)s '
              '-temperature %(temp)s -gpuid -1 -verbose 0 -seed %(seed)s' % {
-               'file': CP_FILE,
+               'file': cp_path,
                'length': DATA_LENGTH,
                'temp': temperature,
                'seed': int(float(time.time()) * 1000)
@@ -40,9 +39,9 @@ def get_generated_data(temperature):
   return data
 
 section_count = 0
-def get_generated_songs(temperature):
+def get_generated_songs(temperature, cp_path):
   global section_count
-  data = get_generated_data(temperature)
+  data = get_generated_data(temperature, cp_path)
   songs = data.split('X:1\n')
   for song in songs:
     if not song:
@@ -76,8 +75,8 @@ def insert_song(song, col='songs', fields=None):
 
     fields.update({
       'random': random.random(),
-      'created_at': int(time.time())
-      'checkpoint': CP_FILE,
+      'created_at': int(time.time()),
+      'checkpoint': cp_path,
       'abc': song,
       'midi': base64.b64encode(midi),
     })
@@ -91,26 +90,26 @@ def insert_song(song, col='songs', fields=None):
       args = ['convert', '-density', '100', '-trim', s.name, png_path]
       subprocess.call(args)
 
-def insert_generated_songs(temperature):
+def insert_generated_songs(temperature, cp_path):
   count = 0
-  for song in get_generated_songs(temperature):
+  for song in get_generated_songs(temperature, cp_path):
     count += 1
     insert_song(song, fields={
       'temperature': temperature
     })
   return count
 
-def fill_minimum(temperature, min_):
+def fill_minimum(temperature, cp_path, min_):
   num = 0
   while num < min_:
-    num += insert_generated_songs(temperature)
+    num += insert_generated_songs(temperature, cp_path)
   return num
 
-def fill_all_temps(min_):
-  db.checkpoints.update({'name': {'$eq': CP_FILE}}, {'name': CP_FILE}, True)
+def fill_all_temps(cp_path, min_):
+  db.checkpoints.update({'name': {'$eq': cp_path}}, {'name': cp_path}, True)
   for i in range(50, 105, 5):
     temperature = str(i/100.0)
-    num = fill_minimum(temperature, min_)
+    num = fill_minimum(temperature, cp_path, min_)
     print '%s songs inserted, temperature=%s' % (num, temperature)    
 
 # Utility method that is not called from the main process of producing songs.
@@ -151,7 +150,15 @@ if __name__ == '__main__':
   import sys
   min_ = 100
   if len(sys.argv) > 1:
-    min_ = int(sys.argv[1])
+    cp_path = sys.argv[1]
+  if len(sys.argv) > 2:
+    min_ = int(sys.argv[2])
 
-  fill_all_temps(min_)
+  full_cp_path = os.path.join(CHAR_RNN_DIR, 'cv', cp_path)
+  if not os.path.isfile(full_cp_path):
+    print 'Path %s for checkpoint file could not be found'
+    print 'usage: produce.py <path> [num per temp]'
+    sys.exit(1)
+
+  fill_all_temps(cp_path, min_)
 
