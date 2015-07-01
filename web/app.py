@@ -1,6 +1,7 @@
 import decimal
 import os
 import random
+import urlparse
 
 import bson
 import flask
@@ -61,6 +62,15 @@ def render(checkpoint, id_):
   })
 
   return flask.render_template('render.html', song=song)
+
+@app.route('/2png/<id_>.png')
+def png(id_):
+  parts = urlparse.urlparse(flask.request.url)
+  new_path = parts.path.replace('2png', 'png')
+  # Replace the /2png/ with just /png/ and remove the port
+  new_parts = [parts.scheme, parts.hostname, new_path, '', '']
+  new_url = urlparse.urlunsplit(new_parts)
+  return flask.redirect(new_url)
 
 if __name__ == '__main__':
   app.run(debug=is_debug(), host='0.0.0.0')
