@@ -168,6 +168,12 @@ def get_chords(root):
     chords.append(chord)
   return chords
 
+def format_chord(chord):
+  if len(chord) > 1:
+    return '[%s]' % ''.join(chord)
+  else:
+    return chord[0]
+
 def write_chords(out, chords, use_repeat=False):
   if not chords or len(chords) < MIN_CHORDS:
     raise MissingChordsException()
@@ -175,7 +181,8 @@ def write_chords(out, chords, use_repeat=False):
   out.write('[V:chords]')
   if use_repeat:
     out.write(' |:')
-  out.write(' '.join('[%s]' % ''.join(chord) for chord in chords))
+  if len(chords) > 1:
+    out.write(' '.join(format_chord(chord) for chord in chords))
   if use_repeat:
     out.write(':|')
 
