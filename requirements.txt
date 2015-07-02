@@ -5,6 +5,7 @@ Jinja2==2.7.3
 lxml==3.4.4
 MarkupSafe==0.23
 pymongo==3.0.2
+requests==2.7.0
 virtualenv==13.0.3
 Werkzeug==0.10.4
 wheel==0.24.0
