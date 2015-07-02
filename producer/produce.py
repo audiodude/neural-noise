@@ -9,7 +9,7 @@ import time
 import pymongo
 
 CHAR_RNN_DIR = '/home/music/char-rnn'
-ABCM2PS_PATH = '/home/music/abcm2ps-7.8.14/abcm2ps'
+ABCM2PS_PATH = '/home/music/abcm2ps/abcm2ps'
 ABC2MIDI_PATH = '/home/music/abcmidi/abc2midi'
 PNG_OUTPUT_PATH = '/var/nn/png'
 
@@ -59,7 +59,7 @@ def get_generated_songs(temperature, cp_path):
     song = 'X:1\n' + song
     yield song
 
-def insert_song(song, col='songs', fields=None):
+def insert_song(song, checkpoint, fields=None):
   if not fields:
     fields = {}
 
@@ -68,24 +68,25 @@ def insert_song(song, col='songs', fields=None):
     f.flush()
 
     with tempfile.NamedTemporaryFile() as m:
-      args = [ABC2MIDI_PATH, f.name, '-o', m.name,'-silent']
+      args = [ABC2MIDI_PATH, f.name, '-silent', '-o', m.name]
       subprocess.call(args)
       m.seek(0)
       midi = m.read()
 
-    fields.update({
+    data = {
       'random': random.random(),
       'created_at': int(time.time()),
-      'checkpoint': cp_path,
+      'checkpoint': checkpoint,
       'abc': song,
       'midi': base64.b64encode(midi),
-    })
-    db[col].insert(fields)
-    png_path = os.path.join(PNG_OUTPUT_PATH, str(fields['_id']) + '.png')
+    }
+    data.update(fields)
+    db.songs.insert(data)
 
     # Convert from abc to SVG, then to PNG
+    png_path = os.path.join(PNG_OUTPUT_PATH, str(data['_id']) + '.png')
     with tempfile.NamedTemporaryFile() as s:
-      args = [ABCM2PS_PATH, '-O', s.name, f.name]
+      args = [ABCM2PS_PATH, '-q', '-O', s.name, f.name]
       subprocess.call(args)
       args = ['convert', '-density', '100', '-trim', s.name, png_path]
       subprocess.call(args)
@@ -94,7 +95,7 @@ def insert_generated_songs(temperature, cp_path):
   count = 0
   for song in get_generated_songs(temperature, cp_path):
     count += 1
-    insert_song(song, fields={
+    insert_song(song, cp_path, fields={
       'temperature': temperature
     })
   return count
@@ -113,7 +114,8 @@ def fill_all_temps(cp_path, min_):
     print '%s songs inserted, temperature=%s' % (num, temperature)    
 
 # Utility method that is not called from the main process of producing songs.
-def fill_from_disk(dir_path):
+def fill_from_disk(dir_path, checkpoint):
+  count = 0
   for dirpath, dirnames, filenames in os.walk(dir_path):
     for filename in filenames:
       if filename.endswith('.abc'):
@@ -133,8 +135,10 @@ def fill_from_disk(dir_path):
           if md:
             fields['composer'] = md.group(1)
 
-          insert_song(song, 'training', fields)
-
+          print 'Inserting song "%s":%s' % (fields.get('title'), fields['file'])
+          insert_song(song, checkpoint, fields=fields)
+          count += 1
+  print '%s songs inserted, checkpoint=%s' % (count, checkpoint)
 
 # Another utility method, for when songs have outlived their welcome
 def purge_checkpoint(checkpoint):
