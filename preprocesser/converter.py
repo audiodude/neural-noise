@@ -39,7 +39,7 @@ def write_metadata(out, metadata):
       for v in value:
         out.write('%s:%s\n' % (key, v))
 
-def get_metadata(root, skip_artist_title=True):
+def get_metadata(root, skip_artist_title=False):
   metadata = {}
   if not skip_artist_title:
     artist = root.xpath('//artist/text()')
