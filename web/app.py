@@ -66,9 +66,9 @@ def render(checkpoint, id_):
 def png(id_):
   parts = urlparse.urlparse(flask.request.url)
   new_host = flask.request.headers['Host']
-  new_host = new_host if new_host else parts.hostname
+  new_host = new_host[:new_host.find(':')]  # Strip out port
   new_path = parts.path.replace('2png', 'png')
-  # Replace the /2png/ with just /png/ and remove the port
+  # Replace the /2png/ with just /png/.
   new_parts = [parts.scheme, new_host, new_path, '', '']
   new_url = urlparse.urlunsplit(new_parts)
   return flask.redirect(new_url)
