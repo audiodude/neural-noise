@@ -42,16 +42,21 @@
       });
     }
 
-    var is_playing = false;
+    var stop_id;
     function playpause() {
-      if (is_playing) {
+      if (stop_id) {
+        window.clearTimeout(stop_id);
+      }
+      if (player.playing) {
         player.pause();
         document.getElementById('playpause').innerHTML = 'Resume';
-        is_playing = false;
       } else {
         player.start();
+        stop_id = window.setTimeout(function() {
+          player.stop();
+          document.getElementById('playpause').innerHTML = 'Play';
+        }, player.endTime - player.currentTime);
         document.getElementById('playpause').innerHTML = 'Pause';
-        is_playing = true;
       }
     }
   </script>
@@ -60,6 +65,6 @@
   <p>Welcome to the song explorer.</p>
   <p><textarea rows="30" cols="90">{{ song['abc'] }}</textarea></p>
   <p><button id="playpause" onclick="playpause()" disabled="disabled">Play</button></p>
-  <p><img src="/png/{{ song['_id'] }}.png"/></p>
+  <p><img src="/2png/{{ song['_id'] }}.png"/></p>
 </body>
 </html>

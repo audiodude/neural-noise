@@ -15,6 +15,13 @@
     </select>
     <br>
     <br>
+    <select name="checkpoint">
+      {% for cp in checkpoints %}
+        <option value="{{ cp }}">{{ cp }}</option>
+      {% endfor %}
+    </select>
+    <br>
+    <br>
     <input type="submit" value="Generate music"/>
   </form>
 </body>
