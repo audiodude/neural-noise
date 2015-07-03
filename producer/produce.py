@@ -39,6 +39,14 @@ def get_generated_data(temperature, cp_path):
   return data
 
 section_count = 0
+def strip_and_count_sections(song):
+  def process_section(md):
+    global section_count
+    if md.group(1):
+      section_count += 1
+    return md.group(1)
+  return RE_REPEAT.sub(process_section, song)
+
 def get_generated_songs(temperature, cp_path):
   global section_count
   data = get_generated_data(temperature, cp_path)
@@ -48,12 +56,7 @@ def get_generated_songs(temperature, cp_path):
       continue
 
     section_count = 0
-    def process_section(md):
-      global section_count
-      if md.group(1):
-        section_count += 1
-      return md.group(1)
-    song = RE_REPEAT.sub(process_section, song)
+    song = strip_and_count_sections(song)
     if section_count < 2:
       continue
     song = 'X:1\n' + song
@@ -121,8 +124,7 @@ def fill_from_disk(dir_path, checkpoint):
       if filename.endswith('.abc'):
         full_path = os.path.join(dirpath, filename)
         with open(full_path) as f:
-          song = f.read()
-
+          song = strip_and_count_sections(f.read())
           fields = {
             'file': filename,
           }
