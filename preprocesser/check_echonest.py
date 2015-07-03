@@ -20,12 +20,13 @@ def found_song(xml_path, api_key):
     return
 
   artist = root.xpath('//artist/text()')
-  if artist:
-    params['artist'] = artist
-
   title = root.xpath('//title/text()')
-  if title:
-    params['title'] = title
+  if not (artist and title):
+    # Skip anything that doesn't have an artist AND a title
+    return False
+
+  params['artist'] = artist
+  params['title'] = title
 
   resp = requests.get(EN_SONG_SEARCH_URL, params=params)
   resp.raise_for_status()
