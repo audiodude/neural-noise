@@ -21,9 +21,11 @@ def random_song(checkpoint, temperature):
   # Taken from http://stackoverflow.com/a/21867984/41060
   query = {
     'checkpoint': { '$eq': checkpoint },
-    'temperature': { '$eq': temperature },
     'random': { '$lte': random.random() },
   }
+  if temperature:
+    query['temperature'] = { '$eq': temperature }
+
   cursor = db.songs.find(query).sort('random', pymongo.DESCENDING)
   try:
     doc = next(cursor)
@@ -46,8 +48,8 @@ def index():
 
 @app.route('/query')
 def query():
-  temperature = flask.request.args['temperature']
-  checkpoint = flask.request.args['checkpoint']
+  temperature = flask.request.args.get('temperature')
+  checkpoint = flask.request.args.get('checkpoint')
   song = random_song(checkpoint, temperature)
   if not song:
     return 'Error: no songs at checkpoint=%swith temperature=%s found' % (checkpoint, temperature)
