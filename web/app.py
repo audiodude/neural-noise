@@ -5,6 +5,7 @@ import urlparse
 
 import bson
 import flask
+import markdown
 import pymongo
 
 
@@ -75,6 +76,13 @@ def png(id_):
   new_parts = [parts.scheme, new_host, new_path, '', '']
   new_url = urlparse.urlunsplit(new_parts)
   return flask.redirect(new_url)
+
+@app.route('/about')
+def about():
+  md_path = os.path.join(os.path.dirname(__file__), 'templates/_about.md')
+  with open(md_path) as f:
+    content = flask.Markup(markdown.markdown(f.read()))
+  return flask.render_template('about.html', content=content)
 
 if __name__ == '__main__':
   app.run(debug=is_debug(), host='0.0.0.0')
