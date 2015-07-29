@@ -1,0 +1,17 @@
+{
+  "name": "neural-noise-web",
+  "description": "The web frontend for the Neural Noise project",
+  "version": "0.0.2",
+  "homepage": "http://nn.0-z-0.com",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "angular": "^1.4.x",
+    "angular-animate": "^1.4.x",
+    "angular-aria": "^1.4.x",
+    "angular-material": "~0.10.0"
+  },
+  "devDependencies": {
+    "angular-material": "~0.10.0"
+  }
+}
