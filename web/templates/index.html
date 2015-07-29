@@ -1,28 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic"/>
+    <link rel="stylesheet" href="/static/components/angular-material/angular-material.css"/>
+    <link rel="stylesheet" href="/static/css/style.css"/>
+
+  <script src="/static/components/angular/angular.js"></script>
+  <script src="/static/components/angular-animate/angular-animate.js"></script>
+  <script src="/static/components/angular-aria/angular-aria.js"></script>
+  <script type="text/javascript" src="/static/components/angular-material/angular-material.js"></script>
+
+  <script src="/static/js/app/main.js"></script>
 </head>
-<body>
-  <h1>Neural Noise</h1>
-  <b>Temperature:</b><br>
-  <form action="/query">
-    <select name="temperature">
-      {% for i in range(50, 105, 5) %}
-        <option value="{{i/100.0}}" {%if i == 90%}selected{%endif%}>
+<body ng-app="neuralNoise" ng-controller="MainController as main"
+      layout="row" layout-align="center">
+  <md-content flex-gt-sm="70" flex-sm="90"
+              layout="column" layout-padding>
+    <section>
+      <h1>Neural Noise</h1>
+      <p>
+        Neural Noise generates music snippets from the output of a Recurrent
+        Neural Network (<a href="https://github.com/karpathy/char-rnn">char-rnn</a>). The networks (there are multiple to choose from below) were trained on a
+        few thousand pop songs and take input and output in
+        <a href="http://abcnotation.com">abc notation</a>.
+      </p>
+      <p>
+        The code for this project is open source and
+        <a href="https://github.com/audiodude/neural-noise">lives on Github</a>.
+      </p>
+      <p>
+        Since it takes upwards of 10 seconds to generate a song, and most
+        visitors are interested in a random song anyways, the current function
+        of this site is to return pre-generated songs at given temperature
+        values
+      </p>
+      <p>
+        Neural Noise is a project of Travis Briggs. See more at
+        <a href="http://travisbriggs.com">http://travisbriggs.com</a>
+    </section>
+    <section>
+      <hr>
+      <p>
+        Select the name of a checkpoint and the temperature value to browse song
+        snippets generated using that checkpoint at that temperature.
+      </p>
+      <md-select placeholder="Temperature" ng-model="main.temperature">
+        {% for i in range(50, 105, 5): %}
+        <md-option value="{{i/100.0}}">
           {{i/100.0}}
-        </option>
-      {% endfor %}
-    </select>
-    <br>
-    <br>
-    <select name="checkpoint">
-      {% for cp in checkpoints %}
-        <option value="{{ cp['name'] }}">{{ cp['nickname'] }} ({{ cp['name'] }})</option>
-      {% endfor %}
-    </select>
-    <br>
-    <br>
-    <input type="submit" value="Generate music"/>
-  </form>
+        </md-option>
+        {% endfor %}
+      </md-select>
+
+      <md-select placeholder="Checkpoint" ng-model="main.checkpoint">
+        {% for cp in checkpoints %}
+        <md-option value="{{ cp['name'] }}">
+          {{ cp['nickname'] }} ({{ cp['name'] }})
+        </md-option>
+        {% endfor %}
+      </md-select>
+
+      <md-button class="md-primary" ng-click="main.getRandomSong()">
+        Explore snippets
+      </md-button>
+    </section>
+  </md-content>
 </body>
 </html>

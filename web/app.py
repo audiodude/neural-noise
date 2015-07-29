@@ -5,6 +5,7 @@ import urlparse
 
 import bson
 import flask
+import markdown
 import pymongo
 
 
@@ -52,7 +53,7 @@ def query():
   checkpoint = flask.request.args.get('checkpoint')
   song = random_song(checkpoint, temperature)
   if not song:
-    return 'Error: no songs at checkpoint=%swith temperature=%s found' % (checkpoint, temperature)
+    return 'Error: no songs at checkpoint=%s with temperature=%s found' % (checkpoint, temperature)
   return flask.redirect(flask.url_for(
     'render', checkpoint=checkpoint, id_=str(song['_id'])))
 
@@ -75,6 +76,13 @@ def png(id_):
   new_parts = [parts.scheme, new_host, new_path, '', '']
   new_url = urlparse.urlunsplit(new_parts)
   return flask.redirect(new_url)
+
+@app.route('/about')
+def about():
+  md_path = os.path.join(os.path.dirname(__file__), 'templates/_about.md')
+  with open(md_path) as f:
+    content = flask.Markup(markdown.markdown(f.read()))
+  return flask.render_template('about.html', content=content)
 
 if __name__ == '__main__':
   app.run(debug=is_debug(), host='0.0.0.0')
