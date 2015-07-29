@@ -45,6 +45,7 @@ def random_song(checkpoint, temperature):
 @app.route('/')
 def index():
   checkpoints = [cp['name'] for cp in db.checkpoints.find({})]
+  checkpoints.append('Test')
   return flask.render_template('index.html', checkpoints=checkpoints)
 
 @app.route('/query')
@@ -53,7 +54,7 @@ def query():
   checkpoint = flask.request.args.get('checkpoint')
   song = random_song(checkpoint, temperature)
   if not song:
-    return 'Error: no songs at checkpoint=%swith temperature=%s found' % (checkpoint, temperature)
+    return 'Error: no songs at checkpoint=%s with temperature=%s found' % (checkpoint, temperature)
   return flask.redirect(flask.url_for(
     'render', checkpoint=checkpoint, id_=str(song['_id'])))
 
