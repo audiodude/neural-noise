@@ -17,7 +17,7 @@
     <br>
     <select name="checkpoint">
       {% for cp in checkpoints %}
-        <option value="{{ cp }}">{{ cp }}</option>
+        <option value="{{ cp['name'] }}">{{ cp['nickname'] }} ({{ cp['name'] }})</option>
       {% endfor %}
     </select>
     <br>

@@ -43,7 +43,7 @@ def random_song(checkpoint, temperature):
 
 @app.route('/')
 def index():
-  checkpoints = [cp['name'] for cp in db.checkpoints.find({})]
+  checkpoints = [cp for cp in db.checkpoints.find({})]
   return flask.render_template('index.html', checkpoints=checkpoints)
 
 @app.route('/query')
