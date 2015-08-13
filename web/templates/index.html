@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
 
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic"/>
@@ -27,17 +26,16 @@
         Neural Noise generates music snippets from the output of a Recurrent
         Neural Network (<a href="https://github.com/karpathy/char-rnn">char-rnn</a>). The networks (there are multiple to choose from below) were trained on a
         few thousand pop songs and take input and output in
-        <a href="http://abcnotation.com">abc notation</a>.
-      </p>
-      <p>
-        The code for this project is open source and
-        <a href="https://github.com/audiodude/neural-noise">lives on Github</a>.
+        <a href="http://abcnotation.com">abc notation</a>. You can
+        <a href="/about">read more about Neural Noise</a>, or browse the open
+        source code for this project
+        <a href="https://github.com/audiodude/neural-noise">on Github</a>.
       </p>
       <p>
         Since it takes upwards of 10 seconds to generate a song, and most
         visitors are interested in a random song anyways, the current function
         of this site is to return pre-generated songs at given temperature
-        values
+        values.
       </p>
       <p>
         Neural Noise is a project of Travis Briggs. See more at
@@ -47,7 +45,12 @@
       <hr>
       <p>
         Select the name of a checkpoint and the temperature value to browse song
-        snippets generated using that checkpoint at that temperature.
+        snippets generated using that checkpoint at that temperature. Andrej
+        Karpathy, the author of the char-rnn program that Neural Noise is based
+        on, has a good discussion of temperature in
+        <a href="http://karpathy.github.io/2015/05/21/rnn-effectiveness/">
+          his original blog post
+        </a>.
       </p>
       <md-select placeholder="Temperature" ng-model="main.temperature">
         {% for i in range(50, 105, 5): %}
@@ -60,7 +63,7 @@
       <md-select placeholder="Checkpoint" ng-model="main.checkpoint">
         {% for cp in checkpoints %}
         <md-option value="{{ cp['name'] }}">
-          {{ cp['nickname'] }} ({{ cp['name'] }})
+          {{ cp['name'] }} ({{ cp['nickname'] }})
         </md-option>
         {% endfor %}
       </md-select>

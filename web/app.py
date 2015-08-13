@@ -62,8 +62,12 @@ def render(checkpoint, id_):
   song = db.songs.find_one({
     '_id': { '$eq': bson.objectid.ObjectId(id_) }
   })
+  song['abc_rows'] = song['abc'].count('\n') + int(len(song['abc'])/100)
+  checkpoint = db.checkpoints.find_one({
+    'name': { '$eq': song['checkpoint'] }
+  })
 
-  return flask.render_template('render.html', song=song)
+  return flask.render_template('render.html', song=song, checkpoint=checkpoint)
 
 @app.route('/2png/<id_>.png')
 def png(id_):

@@ -2,3 +2,30 @@ body {
   background-color: #add8e6;
   margin: 0;
 }
+
+.render-abc,
+.render-score {
+  max-width: 711px;
+}
+
+section {
+  margin: 20px 0;
+}
+
+.playing,
+.paused,
+.stopped {
+  display: none;
+}
+
+#playpause.playing,
+#playpause.paused,
+#playpause.stopped {
+  display: block;
+}
+
+#playpause.playing .playing,
+#playpause.paused .paused,
+#playpause.stopped .stopped {
+  display: inline-block;
+}
