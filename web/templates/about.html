@@ -1,9 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+  <title>Neural Noise - About the project</title>
   <link rel="stylesheet" href="/static/css/foghorn.css"/>
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="/static/components/angular-material/angular-material.css"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+
+  <script src="/static/components/angular/angular.js"></script>
+  <script src="/static/components/angular-animate/angular-animate.js"></script>
+  <script src="/static/components/angular-aria/angular-aria.js"></script>
+  <script type="text/javascript" src="/static/components/angular-material/angular-material.js"></script>
+
+  <script src="/static/js/app/main.js"></script>
 </head>
-<body>
-  {{ content }}
+<body ng-app="neuralNoise" ng-controller="MainController as main"
+      layout="row" layout-align="center">
+  <md-content class="render-content" flex-gt-sm="70" flex-sm="90"
+              layout="column" layout-padding>
+    {{ content }}
+  </md-content>
 </body>
 </html>

@@ -1,11 +1,5 @@
 @import url(http://fonts.googleapis.com/css?family=Vollkorn:400,400italic,700,700italic&subset=latin);
 
-html, body {
-        padding:1em;
-        margin:auto;
-        max-width:42em;
-        background:#fefefe;
-	}
 body {
 	font: 1.3em "Vollkorn", Palatino, Times;
 	color: #333;
@@ -116,28 +110,3 @@ p#heart{
 body#index li {
 	margin-bottom: 1em;
 	}
-
-
-/* iPad
--------------------------------------------------------- */
-@media only screen and (max-device-width: 1024px) {
-body {
-	font-size: 120%;
-	line-height: 1.4;
-	}
-} /* @iPad */
-
-/* iPhone
--------------------------------------------------------- */
-@media only screen and (max-device-width: 480px) {
-body {
-	text-align: left;
-	}
-article, footer {
-	width: auto;
-	}
-article {
-	padding: 0 10px;
-	}
-} /* @iPhone */
-
