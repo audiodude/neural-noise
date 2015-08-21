@@ -18,8 +18,8 @@
 </head>
 <body ng-app="neuralNoise" ng-controller="MainController as main"
       layout="row" layout-align="center">
-  <md-content flex-gt-sm="70" flex-sm="90"
-              layout="column" layout-padding>
+  <md-content class="main-content" flex-gt-sm="70" flex-sm="90" layout="column"
+              layout-padding>
     <section>
       <h1>Neural Noise</h1>
       <p>
@@ -35,13 +35,18 @@
         Since it takes upwards of 10 seconds to generate a song, and most
         visitors are interested in a random song anyways, the current function
         of this site is to return pre-generated songs at given temperature
-        values.
+        values. As of 2015-08-20 there are approximately 500 songs per
+        temperature value for checkpoints lm_lstm_epoch19.46_0.4127.t7 (non-real
+        pop songs removed) and lm_lstm_epoch17.65_0.7648.7 (using nn format).
+        The checkpoint lm_lstm_epoch21.83_0.3838.t7 (First attempt) has about
+        100 songs per temperature.
       </p>
       <p>
         Neural Noise is a project of Travis Briggs. See more at
         <a href="http://travisbriggs.com">http://travisbriggs.com</a>
+      </p>
     </section>
-    <section>
+    <section class="index-form">
       <hr>
       <p>
         Select the name of a checkpoint and the temperature value to browse song
