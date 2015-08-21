@@ -2,7 +2,7 @@
 
 Training Recurrent Neural Networks to generate music in text formats
 
-By Travis Briggs, June-August 2015
+By [Travis Briggs](http://travisbriggs.com), June-August 2015
 
 ## Overview
 
@@ -102,7 +102,61 @@ in order to:
 1. Finally, allow the user to randomly browse the new snippets using a [web interface](http://nn.0-z-0.com).
 
 This is a complicated mish-mash (hack) of software, and getting it running is
-not for the faint of heart. Still, in this README we will attempt to document
-the complete set of steps that were used in installing char-rnn, massaging the
-training data, running the training, generating the snippets, and finally
-getting the web interface up and running.
+not for the faint of heart. Therere were many steps used in order to install
+char-rnn, massage training data, run the training, generate the snippets,
+and finally getting the web interface up and running. More details can be found
+on the [Neural Noise Github page](https://github.com/audiodude/neural-noise).
+
+## Training data representation
+
+The training data is in the same format as the output format. So for example,
+consider a randomly selected output song:
+<pre>
+X:1
+M:C
+Q:1/4=134
+V:notes
+V:chords
+K:C
+[V:notes] x4 x x x x x D C D E3 x4 x4 x2 E E5 x2 x C D x D C2 x3 C E D E D4 x2 C
+D E E D2 x2 C2 D2 E2 E D E4 x2 x2 C C E F G2 F E C2 x2 x2 C D E F3 x2 F E D C3
+x2 C D E E4 D3 x2 C2 x2 C D E F3 x2 F E D C3 x2 C D E B,4 C3 E D C2 x2 E E D D2
+x2 E E E D C2 x x2 C B A G2 x x2 C E E E D C2 x2 E E E E D2 C D2 E E2 x C E E E
+E E E E2 D C4
+[V:chords] [C,8E,8G,8] [G,8B,8D,8] [A,8C,8E,8] [F,8A,8C,8] [C,8E,8G,8]
+[G,8B,8D,8] [A,8C,8E,8] [F,8A,8C,8] [C,8E,8G,8] [G,8B,8D,8] [A,8C,8E,8]
+[F,8A,8C,8]
+</pre>
+
+It is in the abc notation format, which represents musical data in an textual
+format. Note that there is a line for `[V:notes]`, the notes of the melody, as
+well as a line for `[V:chords]`, the harmonization or accompaniment. These lines
+are interpreted by abc interpreters such as abc2midi and abcm2ps to mean that
+both of these lines should be sounded simultaneously.
+
+The training data was in the same format. It was actually a single monolithic
+file that contained almost 4000 such songs concatenated together, as char-rnn
+dictated. The original source of the training data songs was a web scrape of a
+corpus that had pop songs in an XML format. This format contained melody notes
+as well as harmonization/chords.
+
+The melody and chords of the original files were in a "key agnostic" format. So
+instead of absolute note names like `C` and `D` like you see above, the notes
+were dictated in terms of scale degrees. So example, for the key of C:
+<pre>
+C D E F G A B
+1 2 3 4 5 6 7
+</pre>
+
+The melody notes were given in this way: `1 2 3 2 1` would be `do re mi re do`.
+The chord notation was the same, with each chord degree representing the chord
+with the root being that scale degree. So `6` for chords in the key of C
+represents `A minor`.
+
+For simplicity's sake, the output of the XML translation script was always the
+song transposed to the key of C. As a result, all songs that are output by the
+generator are also in the key of C.
+
+## More to come.
+
+Last updated 2015-08-20. More information coming soon.
