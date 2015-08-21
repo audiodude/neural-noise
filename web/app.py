@@ -85,7 +85,7 @@ def png(id_):
 def about():
   md_path = os.path.join(os.path.dirname(__file__), 'templates/_about.md')
   with open(md_path) as f:
-    content = flask.Markup(markdown.markdown(f.read()))
+    content = flask.Markup(markdown.markdown(f.read().decode('utf-8')))
   return flask.render_template('about.html', content=content)
 
 if __name__ == '__main__':
