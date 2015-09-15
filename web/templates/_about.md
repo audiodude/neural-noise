@@ -157,6 +157,9 @@ For simplicity's sake, the output of the XML translation script was always the
 song transposed to the key of C. As a result, all songs that are output by the
 generator are also in the key of C.
 
-## More to come.
+## More on Github
 
-Last updated 2015-08-20. More information coming soon.
+As mentioned elsewhere on this site, the code for this project is open source
+and [lives on Github](https://github.com/audiodude/neural-noise). Feel free to
+poke around the repository and ask questions via issues about any parts you
+don't understand.
