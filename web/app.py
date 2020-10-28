@@ -44,8 +44,7 @@ def random_song(checkpoint, temperature):
 
 @app.route('/')
 def index():
-  checkpoints = [cp['name'] for cp in db.checkpoints.find({})]
-  checkpoints.append('Test')
+  checkpoints = [cp for cp in db.checkpoints.find({})]
   return flask.render_template('index.html', checkpoints=checkpoints)
 
 @app.route('/query')
@@ -63,8 +62,12 @@ def render(checkpoint, id_):
   song = db.songs.find_one({
     '_id': { '$eq': bson.objectid.ObjectId(id_) }
   })
+  song['abc_rows'] = song['abc'].count('\n') + int(len(song['abc'])/100)
+  checkpoint = db.checkpoints.find_one({
+    'name': { '$eq': song['checkpoint'] }
+  })
 
-  return flask.render_template('render.html', song=song)
+  return flask.render_template('render.html', song=song, checkpoint=checkpoint)
 
 @app.route('/2png/<id_>.png')
 def png(id_):
@@ -82,7 +85,7 @@ def png(id_):
 def about():
   md_path = os.path.join(os.path.dirname(__file__), 'templates/_about.md')
   with open(md_path) as f:
-    content = flask.Markup(markdown.markdown(f.read()))
+    content = flask.Markup(markdown.markdown(f.read().decode('utf-8')))
   return flask.render_template('about.html', content=content)
 
 if __name__ == '__main__':
